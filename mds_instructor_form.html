@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MDS Weekly Feedback</title>
+<style>
+:root {
+  --y: #C49200;
+  --ydim: rgba(196,146,0,0.14);
+  --bg: #0F0F0F;
+  --card: #1C1C1C;
+  --border: #2E2E2E;
+  --text: #FFFFFF;
+  --muted: #808080;
+  --r: 14px;
+  --rs: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;}
+.app{min-height:100vh;display:flex;flex-direction:column;max-width:430px;margin:0 auto;padding:0 18px 48px;}
+
+/* Progress */
+.prog-bar{height:3px;background:var(--border);position:fixed;top:0;left:0;right:0;z-index:100;}
+.prog-fill{height:100%;background:var(--y);border-radius:2px;transition:width .4s ease;}
+
+/* Steps */
+.step{display:none;flex-direction:column;min-height:100vh;padding:56px 0 32px;animation:fadeUp .28s ease;}
+.step.active{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* Welcome */
+.logo-mds{font-size:56px;font-weight:900;color:var(--y);letter-spacing:-3px;line-height:1;}
+.logo-tag{font-size:11px;font-weight:700;letter-spacing:3.5px;color:var(--muted);text-transform:uppercase;margin-top:5px;}
+.w-title{font-size:30px;font-weight:800;margin:32px 0 8px;line-height:1.15;}
+.w-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px;}
+.name-field{width:100%;padding:15px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:16px;font-family:inherit;margin-bottom:20px;}
+.name-field::placeholder{color:var(--muted);}
+.name-field:focus{outline:2px solid var(--y);border-color:transparent;}
+
+/* Step header */
+.step-badge{display:inline-block;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--y);background:var(--ydim);padding:4px 10px;border-radius:20px;margin-bottom:16px;}
+.step-q{font-size:24px;font-weight:800;line-height:1.2;margin-bottom:6px;}
+.step-hint{font-size:13px;color:var(--muted);margin-bottom:24px;}
+
+/* Big number stepper */
+.big-stepper{display:flex;align-items:center;justify-content:center;gap:32px;margin:auto 0;padding:48px 0;}
+.big-btn{width:60px;height:60px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:30px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;-webkit-user-select:none;user-select:none;}
+.big-btn:active{background:var(--y);border-color:var(--y);transform:scale(.92);}
+.big-num{font-size:80px;font-weight:900;color:var(--y);min-width:110px;text-align:center;line-height:1;font-variant-numeric:tabular-nums;}
+
+/* Rating cards */
+.r-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.r-label{font-size:13px;flex:1;line-height:1.3;}
+.stars{display:flex;gap:5px;}
+.star{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;padding:0;}
+.star.on{background:var(--y);border-color:var(--y);color:#0F0F0F;}
+
+/* Tiles */
+.tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.tile{padding:13px 12px 13px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);font-size:12.5px;line-height:1.35;cursor:pointer;transition:all .15s;-webkit-user-select:none;user-select:none;position:relative;padding-right:30px;}
+.tile.on{border-color:var(--y);background:var(--ydim);color:var(--y);}
+.tile-dot{position:absolute;top:9px;right:9px;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s;}
+.tile.on .tile-dot{background:var(--y);border-color:var(--y);color:#0F0F0F;}
+
+/* Radio tiles */
+.rtile{padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);font-size:14px;cursor:pointer;transition:all .15s;margin-bottom:9px;display:flex;align-items:center;gap:13px;-webkit-user-select:none;user-select:none;}
+.rtile.on{border-color:var(--y);background:var(--ydim);}
+.rdot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.rtile.on .rdot{border-color:var(--y);background:var(--y);}
+.rdot-inner{width:8px;height:8px;border-radius:50%;background:#0F0F0F;display:none;}
+.rtile.on .rdot-inner{display:block;}
+
+/* Textarea */
+.flag-area{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px 16px;color:var(--text);font-size:15px;font-family:inherit;resize:none;line-height:1.6;min-height:130px;}
+.flag-area::placeholder{color:var(--muted);}
+.flag-area:focus{outline:2px solid var(--y);border-color:transparent;}
+
+/* Buttons */
+.btn{width:100%;padding:16px;background:var(--y);border:none;border-radius:var(--r);color:#0F0F0F;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:auto;letter-spacing:.3px;transition:opacity .15s;}
+.btn:active{opacity:.82;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:14px;padding:13px;margin-top:10px;}
+.btn-ghost:active{background:var(--card);color:var(--text);}
+
+/* Done screen */
+.done{display:none;flex-direction:column;min-height:100vh;padding:56px 0 48px;animation:fadeUp .28s ease;}
+.done.active{display:flex;}
+.done-ring{width:68px;height:68px;border-radius:50%;background:var(--ydim);border:2px solid var(--y);display:flex;align-items:center;justify-content:center;margin-bottom:22px;font-size:32px;color:var(--y);}
+.done-title{font-size:28px;font-weight:800;margin-bottom:8px;}
+.done-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:32px;}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:11px;width:100%;padding:17px;background:#25D366;border:none;border-radius:var(--r);color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:auto;}
+.wa-btn:active{opacity:.88;}
+
+.spacer{flex:1;}
+.mt{margin-top:auto;}
+</style>
+</head>
+<body>
+
+<div class="prog-bar"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<div class="app">
+
+  <!-- WELCOME -->
+  <div class="step active" id="step-0">
+    <div class="spacer"></div>
+    <div>
+      <div class="logo-mds">MDS</div>
+      <div class="logo-tag">Driving School</div>
+    </div>
+    <div class="w-title">Weekly Feedback Form</div>
+    <div class="w-sub">Takes less than 2 minutes. Mostly taps, almost no typing. Your feedback helps us improve and shapes the content we create for learners.</div>
+    <input class="name-field" id="iname" type="text" placeholder="Your name" autocomplete="name">
+    <button class="btn" onclick="goTo(1)">Let&#39;s go</button>
+  </div>
+
+  <!-- STEP 1: LESSONS -->
+  <div class="step" id="step-1">
+    <div class="step-badge">Step 1 of 6</div>
+    <div class="step-q">How many lessons this week?</div>
+    <div class="big-stepper">
+      <button class="big-btn" onclick="stepL(-1)">&#8722;</button>
+      <div class="big-num" id="lnum">0</div>
+      <button class="big-btn" onclick="stepL(1)">&#43;</button>
+    </div>
+    <div class="mt">
+      <button class="btn" onclick="goTo(2)">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: RATINGS -->
+  <div class="step" id="step-2">
+    <div class="step-badge">Step 2 of 6</div>
+    <div class="step-q">Rate your week</div>
+    <div class="step-hint">1 = poor &nbsp;&#8212;&nbsp; 5 = excellent</div>
+    <div id="ratingswrap"></div>
+    <div class="mt">
+      <button class="btn" onclick="goTo(3)">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: GAPS -->
+  <div class="step" id="step-3">
+    <div class="step-badge">Step 3 of 6</div>
+    <div class="step-q">What did learners struggle with?</div>
+    <div class="step-hint">Tap everything that came up this week</div>
+    <div class="tile-grid" id="gapswrap"></div>
+    <div style="margin-top:22px;">
+      <button class="btn" onclick="goTo(4)">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: PROFILE -->
+  <div class="step" id="step-4">
+    <div class="step-badge">Step 4 of 6</div>
+    <div class="step-q">About your learners this week</div>
+    <div class="step-hint" style="margin-bottom:14px;">Most were&#8230;</div>
+    <div id="expwrap"></div>
+    <div style="height:20px;"></div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Their age range (majority)</div>
+    <div id="agewrap"></div>
+    <div style="margin-top:22px;">
+      <button class="btn" onclick="goTo(5)">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: FAQs -->
+  <div class="step" id="step-5">
+    <div class="step-badge">Step 5 of 6</div>
+    <div class="step-q">What did they ask about most?</div>
+    <div class="step-hint">Pick up to 3</div>
+    <div class="tile-grid" id="faqwrap"></div>
+    <div style="margin-top:22px;">
+      <button class="btn" onclick="goTo(6)">Next</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: FLAG -->
+  <div class="step" id="step-6">
+    <div class="step-badge">Step 6 of 6</div>
+    <div class="step-q">Anything to flag?</div>
+    <div class="step-hint">Optional &#8212; complaints, issues, anything worth noting</div>
+    <textarea class="flag-area" id="fnote" placeholder="Type here if needed&#8230;"></textarea>
+    <div style="margin-top:22px;">
+      <button class="btn" onclick="finish()">Submit feedback</button>
+      <button class="btn btn-ghost" onclick="finish()">Skip and submit</button>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="done" id="done">
+    <div class="spacer"></div>
+    <div class="done-ring">&#10003;</div>
+    <div class="done-title">Done &#8212; thank you!</div>
+    <div class="done-sub">Tap the button below to send your feedback straight to Lucky on WhatsApp. One tap and you&#39;re done.</div>
+    <a class="wa-btn" id="walink" href="#" target="_blank">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Send to Lucky on WhatsApp
+    </a>
+    <div class="spacer"></div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────
+//  REPLACE the number below with Lucky's WhatsApp number
+//  Format: country code + number, no + or spaces (e.g. 27831234567)
+var LUCKY_NUM = '27XXXXXXXXXX';
+// ─────────────────────────────────────────────────────────────────
+
+var RATINGS = [
+  {id:'p', lbl:'Your punctuality'},
+  {id:'c', lbl:'Communication with learners'},
+  {id:'x', lbl:'Learner comfort and confidence'},
+  {id:'q', lbl:'Overall session quality'}
+];
+var GAPS = [
+  'Road signs and rules','Clutch and gears','Parallel parking',
+  'Bay parking','Reversing','Intersections','Freeway driving',
+  'Defensive driving','K53 and test prep','Pre-trip checks',
+  'Roundabouts','Nerves and confidence'
+];
+var EXP  = ['Complete beginners','Had some experience','Refresher or returning'];
+var AGES = ['18 to 25','26 to 35','36 and above'];
+var FAQS = [
+  'Lessons before the test','What happens on test day',
+  'How to improve a skill','Cost and packages',
+  'How to book the test','How long to get a licence',
+  'Driving in rain or at night'
+];
+
+var st = {lessons:0, ratings:{}, gaps:{}, exp:'', age:'', faqs:{}, note:''};
+var cur = 0;
+
+// Build all interactive elements
+document.getElementById('ratingswrap').innerHTML = RATINGS.map(function(r){
+  return '<div class="r-card"><span class="r-label">'+r.lbl+'</span><div class="stars">'+
+    [1,2,3,4,5].map(function(n){
+      return '<button class="star" id="s'+r.id+n+'" onclick="rate(\''+r.id+'\','+n+')">&#9733;</button>';
+    }).join('')+'</div></div>';
+}).join('');
+
+document.getElementById('gapswrap').innerHTML = GAPS.map(function(g,i){
+  return '<div class="tile" id="g'+i+'" onclick="tick(\'gaps\',\''+g.replace(/'/g,"\\'")+'\',' +i+',99)"><div class="tile-dot">&#10003;</div>'+g+'</div>';
+}).join('');
+
+document.getElementById('expwrap').innerHTML = EXP.map(function(e,i){
+  return '<div class="rtile" id="e'+i+'" onclick="pick(\'exp\',\''+e+'\',' +EXP.length+')"><div class="rdot"><div class="rdot-inner"></div></div>'+e+'</div>';
+}).join('');
+
+document.getElementById('agewrap').innerHTML = AGES.map(function(a,i){
+  return '<div class="rtile" id="a'+i+'" onclick="pick(\'age\',\''+a+'\',' +AGES.length+')"><div class="rdot"><div class="rdot-inner"></div></div>'+a+'</div>';
+}).join('');
+
+document.getElementById('faqwrap').innerHTML = FAQS.map(function(f,i){
+  return '<div class="tile" id="f'+i+'" onclick="tick(\'faqs\',\''+f.replace(/'/g,"\\'")+'\',' +i+',3)"><div class="tile-dot">&#10003;</div>'+f+'</div>';
+}).join('');
+
+function goTo(n){
+  document.getElementById('step-'+cur).classList.remove('active');
+  cur = n;
+  document.getElementById('step-'+cur).classList.add('active');
+  document.getElementById('prog').style.width = Math.round(n/7*100)+'%';
+  window.scrollTo(0,0);
+}
+
+function stepL(d){ st.lessons = Math.max(0,st.lessons+d); document.getElementById('lnum').textContent=st.lessons; }
+
+function rate(id,v){
+  st.ratings[id]=v;
+  for(var n=1;n<=5;n++){var el=document.getElementById('s'+id+n);if(el)el.classList.toggle('on',n<=v);}
+}
+
+function tick(key,lbl,idx,max){
+  var pre=key==='gaps'?'g':'f';
+  if(st[key][lbl]){delete st[key][lbl];document.getElementById(pre+idx).classList.remove('on');}
+  else{if(Object.keys(st[key]).length>=max)return;st[key][lbl]=true;document.getElementById(pre+idx).classList.add('on');}
+}
+
+function pick(key,val,len){
+  st[key]=val;
+  var def=key==='exp'?EXP:AGES;
+  var pre=key==='exp'?'e':'a';
+  def.forEach(function(item,i){var el=document.getElementById(pre+i);if(el)el.classList.toggle('on',item===val);});
+}
+
+function finish(){
+  st.note = document.getElementById('fnote').value.trim();
+  var name = document.getElementById('iname').value.trim()||'Instructor';
+  var date = new Date().toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var sm   = {1:'★☆☆☆☆',2:'★★☆☆☆',3:'★★★☆☆',4:'★★★★☆',5:'★★★★★'};
+  var rl   = {p:'Punctuality',c:'Communication',x:'Learner comfort',q:'Session quality'};
+
+  var rtxt = RATINGS.map(function(r){var v=st.ratings[r.id];return rl[r.id]+': '+(v?sm[v]:'not rated');}).join('\n');
+  var gtxt = Object.keys(st.gaps).length ? Object.keys(st.gaps).map(function(g){return '• '+g;}).join('\n') : 'None selected';
+  var ftxt = Object.keys(st.faqs).length ? Object.keys(st.faqs).map(function(f){return '• '+f;}).join('\n') : 'None selected';
+
+  var msg =
+    '🚗 *MDS Weekly Instructor Feedback*\n'+
+    '_'+name+' — '+date+'_\n\n'+
+    '📋 *Lessons this week:* '+st.lessons+'\n\n'+
+    '⭐ *Service ratings:*\n'+rtxt+'\n\n'+
+    '📚 *Learners struggled with:*\n'+gtxt+'\n\n'+
+    '👥 *Learner profile:*\n'+
+    '• Experience: '+(st.exp||'not selected')+'\n'+
+    '• Age range: '+(st.age||'not selected')+'\n\n'+
+    '❓ *Most asked questions:*\n'+ftxt+
+    (st.note?'\n\n📌 *Note:* '+st.note:'')+'\n\n'+
+    '_Sent via MDS Feedback Form_';
+
+  document.getElementById('walink').href = 'https://wa.me/'+LUCKY_NUM+'?text='+encodeURIComponent(msg);
+  document.getElementById('step-6').classList.remove('active');
+  document.getElementById('done').classList.add('active');
+  document.getElementById('prog').style.width='100%';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
